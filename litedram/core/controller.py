@@ -48,6 +48,7 @@ class ControllerSettings(Settings):
 class LiteDRAMController(Module):
     def __init__(self, phy_settings, geom_settings, timing_settings, clk_freq,
         controller_settings=ControllerSettings()):
+        print("Creating a LiteDRAM Controller")
         if phy_settings.memtype == "SDR":
             burst_length = phy_settings.nphases
         else:
@@ -95,12 +96,18 @@ class LiteDRAMController(Module):
             self.comb += getattr(interface, "bank"+str(n)).connect(bank_machine.req)
 
         # Multiplexer ------------------------------------------------------------------------------
-        self.submodules.multiplexer = Multiplexer(
+        self.submodules.multiplexer = mux = Multiplexer(
             settings      = self.settings,
             bank_machines = bank_machines,
             refresher     = self.refresher,
             dfi           = self.dfi,
             interface     = interface)
+
+        print("Result of group_by_targets on Multiplexer comb")
+        target_list = fhdl.tools.group_by_targets(mux._fragment.comb)
+        for targets, statement in target_list:
+            print(f"{targets} assigned by {statement}")
+
 
     def get_csrs(self):
         return self.multiplexer.get_csrs()
