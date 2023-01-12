@@ -56,7 +56,31 @@ class LoggingSystem(Module, AutoCSR):
         return message, ready, request
 
     def log_on_rising_edge(self, log_sig):
-        pass
+        message = Signal(48)
+        ready = Signal()
+        request = Signal()
+        
+        self.messages.append(message)
+        self.readys.append(ready)
+        self.requests.append(request)
+
+        # Message always mapped to signal ID
+        self.comb += message.eq(log_sig.duid)
+
+        # Create synchronous signal to track changes
+        track_rising = Signal()
+
+        self.sync += track_rising.eq(log_sig)
+
+        rising_edge = Signal()
+        self.comb += rising_edge.eq(log_sig & ~track_rising)
+
+        # Trigger request on rising edge
+        self.sync += If(rising_edge, request.eq(1))
+
+        # Complete request on ready
+        # If there is a rising edge on the same cycle as ready, keep request high
+        self.sync += If(ready & ~rising_edge, request.eq(0))
         
     def do_finalize(self):
         #Create Arbiter
