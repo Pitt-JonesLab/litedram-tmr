@@ -9,7 +9,7 @@
                                         powered by Migen & LiteX
 ```
 
-[![](https://github.com/Pitt-JonesLab/litedram-tmr/workflows/ci/badge.svg)](https://github.com/enjoy-digital/litedram/actions) ![License](https://img.shields.io/badge/License-BSD%202--Clause-orange.svg)
+[![](https://github.com/Pitt-JonesLab/litedram-tmr/workflows/ci/badge.svg)](https://github.com/Pitt-JonesLab/litedram-tmr/actions) ![License](https://img.shields.io/badge/License-BSD%202--Clause-orange.svg)
 
 LiteDRAM is developed and maintained by EnjoyDigital.
 
