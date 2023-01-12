@@ -83,6 +83,10 @@ class LoggingSystem(Module, AutoCSR):
         self.sync += If(ready & ~rising_edge, request.eq(0))
         
     def do_finalize(self):
+        # Generate nothing for empty log system
+        if len(self.messages) == 0:
+            return
+
         #Create Arbiter
         arbiter = roundrobin.RoundRobin(len(self.messages), roundrobin.SP_CE)
         self.submodules += arbiter

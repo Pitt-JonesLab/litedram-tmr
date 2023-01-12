@@ -9,11 +9,14 @@
 
 from migen import *
 
+from litex.soc.interconnect.csr import *
+
 from litedram.common import *
 from litedram.phy import dfi
 from litedram.core.refresher import Refresher
 from litedram.core.bankmachine import BankMachine
 from litedram.core.multiplexer import Multiplexer
+from litedram.core.logging import LoggingSystem
 
 # Settings -----------------------------------------------------------------------------------------
 
@@ -45,10 +48,9 @@ class ControllerSettings(Settings):
 
 # Controller ---------------------------------------------------------------------------------------
 
-class LiteDRAMController(Module):
+class LiteDRAMController(Module, AutoCSR):
     def __init__(self, phy_settings, geom_settings, timing_settings, clk_freq,
-        controller_settings=ControllerSettings()):
-        print("Creating a LiteDRAM Controller")
+        controller_settings=ControllerSettings(), **kwargs):
         if phy_settings.memtype == "SDR":
             burst_length = phy_settings.nphases
         else:
@@ -77,6 +79,13 @@ class LiteDRAMController(Module):
 
         # # #
 
+        # Logging System ---------------------------------------------------------------------------
+        self.submodules.logger = LoggingSystem()
+
+        logger_irq = kwargs['logger_irq']
+
+        self.comb += logger_irq.trigger.eq(self.logger.readable)
+
         # Refresher --------------------------------------------------------------------------------
         self.submodules.refresher = self.settings.refresh_cls(self.settings,
             clk_freq   = clk_freq,
@@ -103,11 +112,5 @@ class LiteDRAMController(Module):
             dfi           = self.dfi,
             interface     = interface)
 
-        print("Result of group_by_targets on Multiplexer comb")
-        target_list = fhdl.tools.group_by_targets(mux._fragment.comb)
-        for targets, statement in target_list:
-            print(f"{targets} assigned by {statement}")
-
-
-    def get_csrs(self):
-        return self.multiplexer.get_csrs()
+    #def get_csrs(self):
+    #    return self.multiplexer.get_csrs()

@@ -6,6 +6,7 @@
 
 from migen import *
 
+from litex.soc.interconnect.csr_eventmanager import *
 from litex.soc.interconnect.csr import AutoCSR
 
 from litedram.dfii import DFIInjector
@@ -23,6 +24,11 @@ class LiteDRAMCore(Module, AutoCSR):
             databits    = phy.settings.dfi_databits,
             nphases     = phy.settings.nphases)
         self.comb += self.dfii.master.connect(phy.dfi)
+
+        self.submodules.ev = EventManager()
+        self.ev.logger = EventSourcePulse()
+        self.ev.finalize()
+        kwargs['logger_irq'] = self.ev.logger
 
         self.submodules.controller = controller = LiteDRAMController(
             phy_settings    = phy.settings,
